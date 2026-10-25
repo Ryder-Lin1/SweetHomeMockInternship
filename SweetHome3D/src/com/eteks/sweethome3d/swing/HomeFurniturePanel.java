@@ -19,9 +19,7 @@
  */
 package com.eteks.sweethome3d.swing;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
@@ -44,6 +42,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import com.eteks.sweethome3d.model.Home;
 import com.eteks.sweethome3d.model.UserPreferences;
 import com.eteks.sweethome3d.tools.OperatingSystem;
 import com.eteks.sweethome3d.viewcontroller.DialogView;
@@ -58,6 +57,7 @@ import com.eteks.sweethome3d.viewcontroller.View;
  */
 public class HomeFurniturePanel extends JPanel implements DialogView {
   private final HomeFurnitureController controller;
+
   private JLabel                  nameLabel;
   private JTextField              nameTextField;
   private JLabel                  descriptionLabel;
@@ -119,7 +119,6 @@ public class HomeFurniturePanel extends JPanel implements DialogView {
                                 final HomeFurnitureController controller) {
     // Get unit name matching current unit 
     String unitName = preferences.getLengthUnit().getName();
-    
     if (controller.isPropertyEditable(HomeFurnitureController.Property.NAME)) {
       // Create name label and its text field bound to NAME controller property
       this.nameLabel = new JLabel(SwingTools.getLocalizedLabelText(preferences, HomeFurniturePanel.class, "nameLabel.text"));
@@ -154,7 +153,6 @@ public class HomeFurniturePanel extends JPanel implements DialogView {
           }
         });
     }
-        
     if (controller.isPropertyEditable(HomeFurnitureController.Property.NAME_VISIBLE)) {
       // Create name visible check box bound to NAME_VISIBLE controller property
       this.nameVisibleCheckBox = new NullableCheckBox(SwingTools.getLocalizedLabelText(preferences, 
