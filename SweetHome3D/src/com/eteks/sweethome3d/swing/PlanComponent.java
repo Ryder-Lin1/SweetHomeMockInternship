@@ -2004,10 +2004,57 @@ public class PlanComponent extends JComponent implements PlanView, Scrollable, P
   }
   
   /**
-   * Prints this component plan at the scale given in the home print attributes or at a scale 
-   * that makes it fill <code>pageFormat</code> imageable size if this attribute is <code>null</code>.
+   * Returns the number of plan pages of the selected level, computed by printing
+   * into a throwaway image so the real page isn't drawn on.
+   */
+  private int countPages(PageFormat pageFormat) {
+    BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+    Graphics2D dummy = image.createGraphics();
+    try {
+      int count = 0;
+      while (printSelectedLevel(dummy, pageFormat, count) == PAGE_EXISTS) {
+        count++;
+      }
+      return count;
+    } finally {
+      dummy.dispose();
+    }
+  }
+
+  /**
+   * Prints the plan of every viewable level, in the home's level order, one level after
+   * the other. The selected level is always restored afterwards, even if printing fails.
    */
   public int print(Graphics g, PageFormat pageFormat, int pageIndex) {
+    List<Level> levels = this.home.getLevels();
+    if (levels.isEmpty()) {
+      return printSelectedLevel(g, pageFormat, pageIndex);
+    }
+    Level originalLevel = this.home.getSelectedLevel();
+    int firstPage = 0;
+    try {
+      for (Level level : levels) {
+        if (!level.isViewable()) {
+          continue;
+        }
+        this.home.setSelectedLevel(level);
+        int levelPageCount = countPages(pageFormat);
+        if (pageIndex < firstPage + levelPageCount) {
+          return printSelectedLevel(g, pageFormat, pageIndex - firstPage);
+        }
+        firstPage += levelPageCount;
+      }
+      return NO_SUCH_PAGE;
+    } finally {
+      this.home.setSelectedLevel(originalLevel);
+    }
+  }
+
+  /**
+   * Prints the selected level plan at the scale given in the home print attributes or at a scale
+   * that makes it fill <code>pageFormat</code> imageable size if this attribute is <code>null</code>.
+   */
+  private int printSelectedLevel(Graphics g, PageFormat pageFormat, int pageIndex) {
     List<Selectable> printedItems = getPaintedItems(); 
     Rectangle2D printedItemBounds = getItemsBounds(g, printedItems);
     if (printedItemBounds != null) {
